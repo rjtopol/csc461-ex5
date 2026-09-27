@@ -14,6 +14,8 @@ var vertexBuffer; // this contains vertex coordinates in triples
 var triangleBuffer; // this contains indices into vertexBuffer in triples
 var triBufferSize = 0; // the number of indices in the triangle buffer
 var vertexPositionAttrib; // where to put position for vertex shader
+var scaleUni;
+var moveUni;
 
 
 // ASSIGNMENT HELPER FUNCTIONS
@@ -156,16 +158,18 @@ function setupShaders() {
     // define fragment shader in essl using es6 template strings
     var fShaderCode = `
         void main(void) {
-            gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0); // all fragments are white
+            gl_FragColor = vec4(0.2, 0.2, 1.0, 1.0); // all fragments are white
         }
     `;
     
     // define vertex shader in essl using es6 template strings
     var vShaderCode = `
         attribute vec3 vertexPosition;
+        uniform vec3 move;
+        uniform float scale;
 
         void main(void) {
-            gl_Position = vec4(vertexPosition, 1.0); // use the untransformed position
+            gl_Position = vec4((vertexPosition + move) / scale, 1.0); // use the untransformed position
         }
     `;
     
@@ -198,6 +202,12 @@ function setupShaders() {
                 gl.useProgram(shaderProgram); // activate shader program (frag and vert)
                 vertexPositionAttrib = // get pointer to vertex shader input
                     gl.getAttribLocation(shaderProgram, "vertexPosition"); 
+                moveUni =
+                    gl.getUniformLocation(shaderProgram, "move");
+                gl.uniform3f(moveUni, -1, -1, 0.0);
+                scaleUni =
+                    gl.getUniformLocation(shaderProgram, "scale");
+                gl.uniform1f(scaleUni, 3.0);
                 gl.enableVertexAttribArray(vertexPositionAttrib); // input to shader from array
             } // end if no shader program link errors
         } // end if no compile errors
